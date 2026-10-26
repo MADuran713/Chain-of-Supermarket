@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>COSC 3380 - Supermarket Web App (Team 22)</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 20px 40px; background: #f8fafc; color: #1e293b; }
+    h1 { color: #0f172a; margin-bottom: 4px; }
+    .subtitle { color: #64748b; margin-top: 0; margin-bottom: 24px; }
+    .card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    h2 { font-size: 1.15rem; color: #1e3a8a; margin-top: 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
+    button { background: #2563eb; color: white; border: none; padding: 9px 16px; border-radius: 6px; font-weight: 500; cursor: pointer; margin-right: 8px; margin-bottom: 8px; font-size: 13px; }
+    button:hover { background: #1d4ed8; }
+    button.danger { background: #dc2626; }
+    button.danger:hover { background: #b91c1c; }
+    button.secondary { background: #059669; }
+    button.secondary:hover { background: #047857; }
+    select, input { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; margin-right: 8px; }
+    pre { background: #0f172a; color: #38bdf8; padding: 16px; border-radius: 6px; overflow-x: auto; max-height: 250px; font-size: 12px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+    th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; }
+    th { background: #f1f5f9; font-weight: 600; color: #334155; }
+    tr:nth-child(even) { background: #f8fafc; }
+    .status-box { font-weight: 600; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+  <h1>Supermarket Chain Enterprise Management</h1>
+  <p class="subtitle">COSC 3380 Database Application &bull; Team 22</p>
+
+  <div class="card">
+    <h2>1. Database Management & Setup</h2>
+    <button onclick="apiCall('/create-tables', 'POST')">Create Tables (DDL)</button>
+    <button onclick="apiCall('/init-lookup', 'POST')">Initialize Lookup Data</button>
+    <button class="danger" onclick="clearTablePrompt()">Delete/Clear Table Data</button>
+    <div style="margin-top: 10px;">
+      <label><b>Browse Table (Limit 10): </b></label>
+      <select id="browseTable">
+        <option value="store">store</option>
+        <option value="item">item</option>
+        <option value="store_stock">store_stock</option>
+        <option value="receipt">receipt</option>
+        <option value="receipt_item">receipt_item</option>
+        <option value="bank.account">bank.account</option>
+        <option value="bank.bank_transaction">bank.bank_transaction</option>
+      </select>
+      <button class="secondary" onclick="browseSelected()">Browse Rows</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2. Front Desk: Customer Checkout Simulation (ACID Transaction)</h2>
+    <div>
+      <label>Store ID: </label><input id="storeId" type="number" value="101" style="width: 80px;">
+      <label>Bank Account ID: </label><input id="accountId" type="number" value="1001" style="width: 90px;">
+      <label>Payment: </label>
+      <select id="paymentMethod">
+        <option value="CARD">CARD</option>
+        <option value="CASH">CASH</option>
+      </select>
+      <label>Items (10-20): </label><input id="numItems" type="number" value="12" style="width: 60px;">
+      <button class="secondary" onclick="simulateCheckout()">Checkout Customer (Execute Transaction)</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3. Back Office Analytics & Reports (JOINs & Aggregations)</h2>
+    <button onclick="fetchReport('salesByState')">Sales by State</button>
+    <button onclick="fetchReport('topItems')">Top 10 Best Sellers</button>
+    <button onclick="fetchReport('lowStock')">Low Stock Alert</button>
+    <button onclick="fetchReport('bankActivity')">Bank Account Balances & Activity</button>
+    <button onclick="fetchReport('receiptDetail')">Latest Receipt Line-Item Detail</button>
+  </div>
+
+  <div class="card">
+    <h2>Execution Output & SQL Trace</h2>
+    <div id="status" class="status-box">Status: Ready</div>
+    <div id="tableOutput"></div>
+    <h3>SQL Executed:</h3>
+    <pre id="sqlOutput">-- Executed SQL statements will appear here --</pre>
+  </div>
+
+  <script>
+    async function apiCall(url, method = 'GET', body = null) {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = 'Processing...';
+      try {
+        const opts = { method, headers: { 'Content-Type': 'application/json' } };
+        if (body) opts.body = JSON.stringify(body);
+        const res = await fetch(url, opts);
+        const data = await res.json();
+        
+        statusEl.textContent = (data.success ? 'Success (' : 'Error (') + (data.ms || 0) + ' ms): ' + data.message;
+        document.getElementById('sqlOutput').textContent = data.sql || '-- No SQL returned --';
+        renderTable(data.rows || []);
+      } catch (err) {
+        statusEl.textContent = 'Network/Execution Error: ' + err.message;
+      }
+    }
+
+    function clearTablePrompt() {
+      const tbl = prompt('Enter table name to clear (e.g., receipt, store_stock, bank.bank_transaction):');
+      if (tbl && confirm(`Are you sure you want to TRUNCATE table "${tbl}"? This is irreversible.`)) {
+        apiCall(`/clear/${tbl}`, 'POST');
+      }
+    }
+
+    function browseSelected() {
+      const tbl = document.getElementById('browseTable').value;
+      apiCall(`/browse/${tbl}`);
+    }
+
+    function simulateCheckout() {
+      const body = {
+        storeId: document.getElementById('storeId').value,
+        accountId: document.getElementById('accountId').value,
+        paymentMethod: document.getElementById('paymentMethod').value,
+        numItems: document.getElementById('numItems').value
+      };
+      apiCall('/simulate-transaction', 'POST', body);
+    }
+
+    function fetchReport(name) {
+      apiCall(`/report/${name}`);
+    }
+
+    function renderTable(rows) {
+      const out = document.getElementById('tableOutput');
+      if (!rows || rows.length === 0) {
+        out.innerHTML = '<p><i>No rows to display.</i></p>';
+        return;
+      }
+      const cols = Object.keys(rows[0]);
+      let html = '<table><thead><tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
+      for (const r of rows) {
+        html += '<tr>' + cols.map(c => `<td>${r[c] !== null ? r[c] : ''}</td>`).join('') + '</tr>';
+      }
+      html += '</tbody></table>';
+      out.innerHTML = html;
+    }
+  </script>
+</body>
+</html>
