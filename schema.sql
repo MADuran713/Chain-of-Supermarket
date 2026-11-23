@@ -18,7 +18,7 @@ CREATE TABLE store (
     address VARCHAR(150) NOT NULL,
     city VARCHAR(50) NOT NULL,
     state CHAR(2) NOT NULL REFERENCES state_tax(state),
-    num_aisles INT NOT NULL CHECK (num_aisles >= 20)
+    num_aisles INT NOT NULL CHECK (num_aisles BETWEEN 20 AND 40)
 );
 
 CREATE TABLE aisle (
@@ -85,5 +85,7 @@ CREATE TABLE bank.bank_transaction (
 );
 
 CREATE INDEX idx_receipt_store ON receipt(store_id);
+CREATE INDEX idx_receipt_ts ON receipt(receipt_ts);
 CREATE INDEX idx_stock_store_sku ON store_stock(store_id, sku);
 CREATE INDEX idx_receipt_item_sku ON receipt_item(sku);
+CREATE INDEX idx_bank_tx_ts ON bank.bank_transaction(tx_timestamp);
