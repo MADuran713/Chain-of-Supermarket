@@ -18,7 +18,7 @@ An end-to-end relational database and full-stack web application simulating ente
 
 ## Project Deliverables & Quick Links
 
-* **Demo Video (MP4, 5–8 mins):** `https://youtu.be/VIDEO_LINK` *(Replace with your video demo link)*
+* **Demo Video (MP4, 5–8 mins):** `https://youtu.be/n8fpA00wz7g` *(Replace with your video demo link)*
 * **Editable UML ER Model:** `Supermarket_er.drawio` (created in draw.io)
 * **Final Written Report:** `team22.pdf`
 
