@@ -18,7 +18,7 @@ An end-to-end relational database and full-stack web application simulating ente
 
 ## Project Deliverables & Quick Links
 
-* **Demo Video (MP4, 5–8 mins):** `https://youtu.be/n8fpA00wz7g`
+* **Demo Video :** `https://youtu.be/n8fpA00wz7g`
 * **Editable UML ER Model:** `Supermarket_er.drawio` (created in draw.io)
 * **Final Written Report:** `team22.pdf`
 
@@ -161,12 +161,3 @@ erDiagram
   2. **Derived Header Totals (`receipt.subtotal`, `receipt.tax`, `receipt.total`):** Cached at transaction commit time to avoid expensive multi-million-row re-aggregations during financial reporting and bank reconciliation.
 
 ---
-
-## Phase 2 Submission Checklist
-
-* [x] **Enterprise Scale Dataset:** 100 stores across 6 states (`TX`, `CA`, `NY`, `FL`, `IL`, `WA`), 20–40 aisles per store, 30 SKUs, 3,000 inventory records, and 51 bank accounts.
-* [x] **ACID Multi-Table Transactions:** All state mutations (`INSERT`, `UPDATE`, `TRUNCATE`) wrapped in explicit `BEGIN ... COMMIT` / `ROLLBACK` blocks.
-* [x] **Phase 2 Interactive Features:** 100-customer business simulation, parallel multi-connection concurrency test, time-interval transaction filter, sub-millisecond latency readout, emergency stop button, and destructive-action confirmations.
-* [x] **SQL Trace Files:** Automated `transaction.sql` and `query.sql` trace logs generated from live runs.
-* [x] **Server Deployment:** Source files, SQL scripts, and populated tables deployed to `dbs22@52.22.24.16:~/hw4/`.
-* [ ] **Final Report & Video Link:** Update `YOUR_VIDEO_ID` in `README.md` and `public/home.html` once the MP4 walkthrough is uploaded, and submit `team22.pdf`.
