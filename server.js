@@ -26,7 +26,7 @@ const TABLES = ['state_tax', 'store', 'aisle', 'item', 'store_stock', 'receipt',
 
 let abortRequested = false;
 
-// Trace files checked by the TAs: SQL statements sent by the app are appended here
+// SQL statements sent by the app are appended here
 const trace = (file, sql, params) =>
     fs.appendFileSync(path.join(__dirname, file),
         `-- ${new Date().toISOString()}${params && params.length ? ' params=' + JSON.stringify(params) : ''}\n${sql.trim()};\n\n`);
